@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Art Map — Indian Art History</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <style>
+    body, html { height:100%; margin:0; font-family: Arial, Helvetica, sans-serif; }
+    #map { position: absolute; top:0; bottom:0; left:300px; right:0; }
+    #sidebar { position: absolute; top:0; bottom:0; left:0; width:300px; overflow:auto; padding:16px; box-shadow: 2px 0 6px rgba(0,0,0,0.1); background:#fff; }
+    .loc { margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #eee; }
+    .loc h3 { margin:0 0 6px 0; font-size:16px; }
+    .loc p { margin:0; font-size:13px; color:#333; }
+    .btn { display:inline-block; margin-top:8px; padding:6px 10px; border-radius:6px; text-decoration:none; background:#007bff; color:#fff; font-size:13px }
+    img.popup-img { max-width:220px; display:block; margin-bottom:8px; border-radius:4px }
+    @media (max-width:800px){ #sidebar{ position:relative; width:100%; height:220px } #map{ top:220px; left:0 } }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>Interactive Art Map — Indian Art History</h2>
+    <p>Click a location in the list or on the map to view images, descriptions, and historical context about local art movements, artists, and artworks.</p>
+    <hr />
+    <div id="locationsList"></div>
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    const map = L.map('map', { zoomControl: true }).setView([22.0, 79.0], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const locations = [
+      {
+        id: 'ajanta',
+        title: 'Ajanta Caves (Maharashtra)',
+        coords: [20.5528, 75.7036],
+        image: 'image1.jpeg',
+        description: '<strong>Style:</strong> Buddhist rock-cut architecture and murals.<br><strong>Context:</strong> Narrative murals and sculptures (2nd BCE – 6th CE).'
+      },
+      {
+        id: 'khajuraho',
+        title: 'Khajuraho (Madhya Pradesh)',
+        coords: [24.8316, 79.9197],
+        image: 'image2.jpeg',
+        description: '<strong>Style:</strong> Temple sculpture and architecture.<br><strong>Context:</strong> Intricate carvings (10th–12th centuries).'
+      },
+      {
+        id: 'konark',
+        title: 'Konark (Odisha)',
+        coords: [19.8876, 86.0940],
+        image: 'image3.jpeg',
+        description: '<strong>Style:</strong> Kalinga architecture.<br><strong>Context:</strong> Sun Temple with chariot design (13th century).'
+      },
+      {
+        id: 'tanjavur',
+        title: 'Thanjavur (Tamil Nadu)',
+        coords: [10.7867, 79.1378],
+        image: 'image4.jpeg',
+        description: '<strong>Style:</strong> Tanjore paintings, Chola bronzes.<br><strong>Context:</strong> Gold-leaf paintings and bronze sculptures.'
+      },
+      {
+        id: 'santiniketan',
+        title: 'Santiniketan (West Bengal)',
+        coords: [23.6833, 87.6833],
+        image: 'image5.jpeg',
+        description: '<strong>Style:</strong> Bengal School of Art.<br><strong>Context:</strong> Tagore’s hub for modern Indian art and pedagogy.'
+      },
+      {
+        id: 'mughal',
+        title: 'Mughal Centers (Delhi/Agra)',
+        coords: [28.6139, 77.2090],
+        image: 'image6.jpeg',
+        description: '<strong>Style:</strong> Mughal painting & architecture.<br><strong>Context:</strong> Courtly art traditions (16th–19th centuries).'
+      },
+      {
+        id: 'jaipur',
+        title: 'Rajasthan — Jaipur / Udaipur',
+        coords: [26.9124, 75.7873],
+        image: 'image7.jpeg',
+        description: '<strong>Style:</strong> Rajput painting & frescoes.<br><strong>Context:</strong> Bold colors, heroic and romantic themes.'
+      },
+      {
+        id: 'kochi',
+        title: 'Kerala — Kochi / Thrissur',
+        coords: [9.9312, 76.2673],
+        image: 'image8.jpeg',
+        description: '<strong>Style:</strong> Kerala murals & performing arts.<br><strong>Context:</strong> Temple murals and Kathakali culture.'
+      }
+    ];
+
+    const locationsList = document.getElementById('locationsList');
+
+    locations.forEach(loc => {
+      const marker = L.marker(loc.coords).addTo(map);
+
+      const popupContent = `
+        <div style="max-width:240px">
+          <h3 style="margin:4px 0 6px 0">${loc.title}</h3>
+          <img class="popup-img" src="${loc.image}" alt="${loc.title} image" />
+          <p style="font-size:13px;margin:0">${loc.description}</p>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent);
+
+      const div = document.createElement('div');
+      div.className = 'loc';
+      div.innerHTML = `<h3>${loc.title}</h3><p>${loc.description.replace(/<[^>]+>/g, '').slice(0,100)}...</p><a class="btn" href="#" data-id="${loc.id}">Show on map</a>`;
+      locationsList.appendChild(div);
+
+      div.querySelector('.btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        map.setView(loc.coords, 8);
+        marker.openPopup();
+      });
+    });
+
+    const group = new L.featureGroup(locations.map(l => L.marker(l.coords)));
+    map.fitBounds(group.getBounds().pad(0.2));
+  </script>
+</body>
+</html>
